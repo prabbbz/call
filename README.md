@@ -1,15 +1,15 @@
-# Telepon AI
+# Telepon AI (GPT)
 
-Ngobrol suara dengan AI seperti telepon. 8 karakter (4 cewek, 4 cowok), tiap karakter punya kepribadian, suara, nada, dan kecepatan sendiri.
+Ngobrol suara dengan AI seperti telepon. 8 karakter (4 cewek, 4 cowok). Otak: model GPT. Suara: OpenAI TTS (gpt-4o-mini-tts) yang terdengar natural dan bisa diarahkan gaya bicaranya.
 
-## Deploy ke Vercel
+## Deploy ke Vercel (paket Hobby gratis cukup)
 1. Upload folder ini ke GitHub (atau jalankan `npx vercel` di folder ini).
-2. Di vercel.com: **Add New > Project**, pilih repo-nya.
-3. Buka **Settings > Environment Variables**, tambahkan `ANTHROPIC_API_KEY` (dari console.anthropic.com).
-   Opsional: `ANTHROPIC_MODEL` (default `claude-haiku-5-5`, cepat dan murah).
-4. Klik **Deploy**, lalu buka link `.vercel.app` di Chrome atau Edge.
+2. Di vercel.com: Add New > Project, pilih repo-nya.
+3. Settings > Environment Variables, tambahkan `OPENAI_API_KEY` (dari platform.openai.com/api-keys).
+   Opsional: `OPENAI_MODEL` (default `gpt-4.1-mini`) dan `OPENAI_TTS_MODEL` (default `gpt-4o-mini-tts`).
+4. Deploy, lalu buka link `.vercel.app` di Chrome atau Edge.
 
 ## Catatan
-- Mikrofon butuh HTTPS (otomatis di Vercel) dan izin dari browser.
-- Suara berasal dari suara bawaan perangkat, jadi pilihannya beda di tiap HP/komputer. Pilih manual lewat menu Suara perangkat.
-- Siapa pun yang punya link bisa memakai API key-mu. Batasi pemakaian di dashboard Anthropic atau aktifkan Vercel Authentication.
+- API key OpenAI butuh saldo di platform.openai.com. Langganan ChatGPT Plus tidak termasuk API.
+- Pasang batas pengeluaran bulanan di dashboard OpenAI. Siapa pun yang punya link bisa memakai key-mu; aktifkan Vercel Authentication bila perlu.
+- Mikrofon memakai pengenalan suara browser (Chrome/Edge). Mikrofon butuh HTTPS, otomatis di Vercel.

@@ -27,8 +27,8 @@ h1{margin:0;font-size:22px}h2{margin:0 0 10px;font-size:15px}
 .b.go{background:var(--ok);color:#fff}.b.end{background:var(--bad);color:#fff}.b.on{background:hsl(var(--h) 75% 55%);color:#fff}
 button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid hsl(var(--h) 85% 60%);outline-offset:2px}
 .tabs{display:flex;gap:6px;margin-bottom:12px}
-.tab,.chip{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer;font:inherit;font-size:13px}
-.tab.on,.chip.on{background:hsl(var(--h) 75% 55%);border-color:transparent;color:#fff}
+.tab{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer;font:inherit;font-size:13px}
+.tab.on{background:hsl(var(--h) 75% 55%);border-color:transparent;color:#fff}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
 .c{border:2px solid var(--line);background:transparent;color:var(--ink);border-radius:16px;padding:12px;text-align:left;cursor:pointer;font:inherit}
 .c.on{border-color:hsl(var(--ch) 75% 55%);background:hsl(var(--ch) 80% 55%/.12)}
@@ -71,14 +71,13 @@ input[type=range]{width:100%;accent-color:hsl(var(--h) 75% 55%)}
     <section class="box">
       <h2>Suara dan cara bicara</h2>
       <div class="two">
+        <div><label for="voice">Model suara</label><select id="voice"></select></div>
         <div><label for="style">Gaya bicara</label><select id="style">
           <option value="santai">Santai</option><option value="formal">Formal</option><option value="gaul">Gaul</option><option value="lucu">Lucu</option></select></div>
         <div><label for="len">Panjang jawaban</label><select id="len"><option value="singkat">Singkat</option><option value="sedang">Sedang</option></select></div>
         <div><label for="lang">Bahasa</label><select id="lang"><option value="id">Indonesia</option><option value="en">English</option><option value="mix">Campur</option></select></div>
-        <div><label for="voice">Suara perangkat</label><select id="voice"></select></div>
       </div>
-      <label for="pitch">Nada: <span id="pv"></span></label><input type="range" id="pitch" min="0.2" max="2" step="0.05">
-      <label for="rate">Kecepatan: <span id="rv"></span></label><input type="range" id="rate" min="0.5" max="1.8" step="0.05">
+      <label for="rate">Kecepatan bicara: <span id="rv"></span></label><input type="range" id="rate" min="0.7" max="1.5" step="0.05">
       <label for="custom">Tambahan kepribadian (opsional)</label>
       <textarea id="custom" rows="2" placeholder="Contoh: kamu suka kopi dan sering menyebut hujan"></textarea>
       <div class="row"><button class="sm" id="test">🔊 Coba suara</button><button class="sm" id="reset">Atur ulang suara</button></div>
@@ -96,21 +95,22 @@ input[type=range]{width:100%;accent-color:hsl(var(--h) 75% 55%)}
 (()=>{
 const $=i=>document.getElementById(i);
 const CH=[
- {id:"mimi",n:"Mimi",g:"f",e:"👧",h:330,pt:1.3,rt:1.1,b:"Teman akrab yang ceria",d:"Kamu teman akrab yang ceria, hangat, dan suka bercanda.",hi:"Halo! Aku Mimi. Lagi ngapain nih?"},
- {id:"sari",n:"Sari",g:"f",e:"🌸",h:150,pt:1.05,rt:0.9,b:"Kakak yang lembut dan pendengar baik",d:"Kamu kakak perempuan yang lembut, sabar, dan pandai mendengarkan serta memberi semangat.",hi:"Halo, ini Sari. Gimana harimu?"},
- {id:"luna",n:"Luna",g:"f",e:"🔮",h:270,pt:1.1,rt:1.0,b:"Guru cerdas yang jelas menjelaskan",d:"Kamu guru perempuan yang cerdas, suka menjelaskan dengan contoh sederhana, dan penuh rasa ingin tahu.",hi:"Hai, aku Luna. Mau belajar atau ngobrol apa hari ini?"},
- {id:"kirana",n:"Kirana",g:"f",e:"💃",h:20,pt:1.2,rt:1.2,b:"Bestie gaul yang ceplas-ceplos",d:"Kamu bestie perempuan yang gaul, ekspresif, dan ceplas-ceplos tapi tetap baik hati.",hi:"Haii, Kirana di sini! Cerita dong!"},
- {id:"raka",n:"Raka",g:"m",e:"😎",h:210,pt:0.85,rt:1.0,b:"Cowok santai yang humoris",d:"Kamu cowok yang santai, humoris, dan enak diajak ngobrol soal apa saja.",hi:"Yo, aku Raka. Ada apa nih?"},
- {id:"bima",n:"Bima",g:"m",e:"🧔",h:35,pt:0.55,rt:0.85,b:"Mentor bijak bersuara berat",d:"Kamu mentor laki-laki yang tenang, bijak, dan memberi nasihat dengan perumpamaan sederhana.",hi:"Selamat datang. Saya Bima. Silakan, apa yang ingin dibicarakan?"},
- {id:"dion",n:"Dion",g:"m",e:"🤡",h:55,pt:1.0,rt:1.25,b:"Pelawak dengan jokes receh",d:"Kamu laki-laki pelawak yang suka melempar jokes receh dan permainan kata, tapi tetap peduli pada lawan bicara.",hi:"Halo! Aku Dion. Awas ya, jokesku receh!"},
- {id:"arga",n:"Arga",g:"m",e:"🎓",h:185,pt:0.8,rt:1.0,b:"Pelatih bahasa Inggris",d:"Kamu pelatih bahasa Inggris laki-laki yang sabar. Balas dengan English sederhana, lalu koreksi kesalahan lawan bicara dengan lembut.",hi:"Hi, I am Arga. Let us practice English together. How are you today?"}
+ {id:"mimi",n:"Mimi",g:"f",e:"👧",h:330,v:"coral",rt:1.05,b:"Teman akrab yang ceria",s:"a cheerful, bright young Indonesian woman, playful and quick-witted, smiling as she speaks",d:"Kamu teman akrab yang ceria, hangat, dan suka bercanda.",hi:"Halo! Aku Mimi. Lagi ngapain nih?"},
+ {id:"sari",n:"Sari",g:"f",e:"🌸",h:150,v:"sage",rt:0.95,b:"Kakak lembut, pendengar baik",s:"a gentle, warm older-sister voice, soft, calm and caring, slightly slower",d:"Kamu kakak perempuan yang lembut, sabar, pandai mendengarkan dan memberi semangat.",hi:"Halo, ini Sari. Gimana harimu?"},
+ {id:"luna",n:"Luna",g:"f",e:"🔮",h:270,v:"shimmer",rt:1.0,b:"Guru cerdas yang jelas menjelaskan",s:"a clear, confident, intelligent woman, articulate like a favorite teacher",d:"Kamu guru perempuan yang cerdas, menjelaskan dengan contoh sederhana, dan penuh rasa ingin tahu.",hi:"Hai, aku Luna. Mau belajar atau ngobrol apa hari ini?"},
+ {id:"kirana",n:"Kirana",g:"f",e:"💃",h:20,v:"nova",rt:1.1,b:"Bestie gaul yang ceplas-ceplos",s:"an energetic Jakarta best friend, fast, expressive, slangy, laughs easily",d:"Kamu bestie perempuan yang gaul, ekspresif, ceplas-ceplos tapi baik hati.",hi:"Haii, Kirana di sini! Cerita dong!"},
+ {id:"raka",n:"Raka",g:"m",e:"😎",h:210,v:"echo",rt:1.0,b:"Cowok santai yang humoris",s:"a relaxed young Indonesian man, easygoing and casual, with a bit of dry humor",d:"Kamu cowok yang santai, humoris, dan enak diajak ngobrol soal apa saja.",hi:"Yo, aku Raka. Ada apa nih?"},
+ {id:"bima",n:"Bima",g:"m",e:"🧔",h:35,v:"onyx",rt:0.92,b:"Mentor bijak bersuara berat",s:"a deep, calm, wise middle-aged man, slow and deliberate, with warm gravitas",d:"Kamu mentor laki-laki yang tenang, bijak, dan memberi nasihat dengan perumpamaan sederhana.",hi:"Selamat datang. Saya Bima. Silakan, apa yang ingin dibicarakan?"},
+ {id:"dion",n:"Dion",g:"m",e:"🤡",h:55,v:"ash",rt:1.1,b:"Pelawak dengan jokes receh",s:"a goofy comedian, lively, exaggerated timing, pausing before punchlines",d:"Kamu laki-laki pelawak yang suka jokes receh dan permainan kata, tapi tetap peduli pada lawan bicara.",hi:"Halo! Aku Dion. Awas ya, jokesku receh!"},
+ {id:"arga",n:"Arga",g:"m",e:"🎓",h:185,v:"ballad",rt:1.0,b:"Pelatih bahasa Inggris",s:"a patient, friendly English coach with clear pronunciation and an encouraging tone",d:"Kamu pelatih bahasa Inggris laki-laki yang sabar. Balas dengan English sederhana, lalu koreksi kesalahan lawan bicara dengan lembut.",hi:"Hi, I am Arga. Let us practice English together. How are you today?"}
 ];
-let S={ch:"mimi",style:"santai",len:"singkat",lang:"id",voice:"auto",pitch:null,rate:null,custom:"",tab:"all"};
-try{Object.assign(S,JSON.parse(localStorage.getItem("tai")||"{}"))}catch(e){}
-const save=()=>{try{localStorage.setItem("tai",JSON.stringify(S))}catch(e){}};
+const VO=[["coral","Coral (cewek)"],["nova","Nova (cewek)"],["shimmer","Shimmer (cewek)"],["sage","Sage (cewek)"],["ash","Ash (cowok)"],["echo","Echo (cowok)"],["onyx","Onyx (cowok)"],["ballad","Ballad (cowok)"],["verse","Verse (cowok)"],["alloy","Alloy (netral)"],["fable","Fable (netral)"]];
+let S={ch:"mimi",style:"santai",len:"singkat",lang:"id",voice:"auto",rate:null,custom:"",tab:"all"};
+try{Object.assign(S,JSON.parse(localStorage.getItem("tai2")||"{}"))}catch(e){}
+const save=()=>{try{localStorage.setItem("tai2",JSON.stringify(S))}catch(e){}};
 const cur=()=>CH.find(c=>c.id===S.ch)||CH[0];
-const synth=window.speechSynthesis,SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-let voices=[],calling=false,busy=false,speaking=false,muted=false,hist=[],rec=null,token=0,t0=0,tick=null;
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let calling=false,busy=false,speaking=false,muted=false,hist=[],rec=null,token=0,t0=0,tick=null,au=null,stopCur=null;
 
 function status(s,k){$("st").textContent=s;$("av").className="av"+(k?" "+k:"")}
 function log(r,t){const l=$("log");if(!l.querySelector(".m"))l.innerHTML="";const d=document.createElement("div");d.className="m "+r;d.textContent=t;l.appendChild(d);l.scrollTop=l.scrollHeight}
@@ -126,54 +126,44 @@ function renderChars(){
  CH.filter(c=>S.tab==="all"||c.g===S.tab).forEach(c=>{
   const b=document.createElement("button");b.className="c"+(c.id===S.ch?" on":"");b.style.setProperty("--ch",c.h);
   b.innerHTML='<div class="e">'+c.e+'</div><b>'+c.n+'</b><span>'+c.b+'</span>';
-  b.onclick=()=>{S.ch=c.id;S.pitch=null;S.rate=null;S.voice="auto";save();applyChar();renderChars();say(c.hi,true)};
+  b.onclick=()=>{S.ch=c.id;S.rate=null;S.voice="auto";save();applyChar();renderChars();say(c.hi)};
   $("chars").appendChild(b)})
 }
 function applyChar(){
  const c=cur();document.documentElement.style.setProperty("--h",c.h);
  $("av").textContent=c.e;$("nm").textContent=c.n;$("bl").textContent=c.b;
- $("pitch").value=S.pitch??c.pt;$("rate").value=S.rate??c.rt;sync();
- if(voices.length)$("voice").value=S.voice;
+ $("rate").value=S.rate??c.rt;sync();$("voice").value=S.voice;
 }
-function sync(){$("pv").textContent=(+$("pitch").value).toFixed(2);$("rv").textContent=(+$("rate").value).toFixed(2)}
+function sync(){$("rv").textContent=(+$("rate").value).toFixed(2)+"x"}
 
-function loadVoices(){
- if(!synth)return;voices=synth.getVoices();
- const v=$("voice");v.innerHTML='<option value="auto">Otomatis (sesuai karakter)</option>';
- voices.slice().sort((a,b)=>(/^id/i.test(a.lang)?0:1)-(/^id/i.test(b.lang)?0:1)||a.name.localeCompare(b.name))
-  .forEach(x=>{const o=document.createElement("option");o.value=x.name;o.textContent=x.name+" ("+x.lang+")";v.appendChild(o)});
- v.value=S.voice;if(v.value!==S.voice)v.value="auto";
+function instr(){
+ const c=cur(),st={santai:"casual and relaxed",formal:"polite and formal",gaul:"youthful and trendy",lucu:"playful and amused"}[S.style];
+ const lg=S.lang==="en"?"Speak English.":"Speak natural Indonesian with an authentic Indonesian accent"+(S.lang==="mix"?", switching to English words naturally.":".");
+ return "Voice: "+c.s+". Tone: "+st+". "+lg+" Sound like a real person on a phone call: natural rhythm, small pauses, warm intonation, never like reading a script.";
 }
-function autoVoice(c){
- const L=S.lang==="en"?"en":"id";
- let vs=voices.filter(v=>v.lang.toLowerCase().startsWith(L));
- if(!vs.length)vs=voices.filter(v=>/^(id|en)/i.test(v.lang));if(!vs.length)vs=voices;
- const F=/female|wanita|perempuan|gadis|zira|samantha|siti|google/i,M=/male|pria|andika|david|mark|daniel|guy|alex|fred/i;
- let g=vs.filter(v=>c.g==="f"?F.test(v.name):(M.test(v.name)&&!/female/i.test(v.name)));
- if(!g.length)g=vs;
- return g[CH.filter(x=>x.g===c.g).indexOf(c)%g.length];
+async function tts(text){
+ const r=await fetch("/api/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:text,voice:S.voice==="auto"?cur().v:S.voice,instructions:instr()})});
+ if(!r.ok){let m=r.status;try{m=(await r.json()).error||m}catch(e){}throw new Error(m)}
+ return URL.createObjectURL(await r.blob());
 }
-const getVoice=()=>S.voice!=="auto"?voices.find(v=>v.name===S.voice):autoVoice(cur());
-
+function stopSpeech(){token++;if(au){au.pause();au=null}if(stopCur){stopCur();stopCur=null}speaking=false}
 async function say(text){
- if(!synth)return;
- synth.cancel();const my=++token;speaking=true;
- const parts=text.match(/[^.!?\n]+[.!?]*/g)||[text];
- for(const p of parts){
-  if(my!==token)break;if(!p.trim())continue;
-  await new Promise(r=>{
-   const u=new SpeechSynthesisUtterance(p.trim()),v=getVoice();
-   if(v){u.voice=v;u.lang=v.lang}else u.lang=S.lang==="en"?"en-US":"id-ID";
-   u.pitch=+$("pitch").value;u.rate=+$("rate").value;u.onend=u.onerror=r;synth.speak(u)})
+ stopSpeech();const my=++token;speaking=true;
+ const parts=(text.match(/[^.!?\n]+[.!?]*/g)||[text]).map(s=>s.trim()).filter(Boolean);
+ const jobs=parts.map(p=>tts(p).then(u=>({u}),e=>({e})));
+ for(const j of jobs){
+  const x=await j;if(my!==token)break;
+  if(x.e){$("warn").textContent="Error suara: "+x.e.message;break}
+  await new Promise(r=>{stopCur=r;const a=au=new Audio(x.u);a.playbackRate=+$("rate").value;a.onended=a.onerror=r;a.play().catch(r)});
+  URL.revokeObjectURL(x.u);
  }
  if(my===token)speaking=false;
 }
-function stopSpeech(){token++;if(synth)synth.cancel();speaking=false}
 
 function sys(){
  const c=cur(),st={santai:"santai dan natural",formal:"sopan dan formal",gaul:"gaul ala anak muda (sih, dong, banget)",lucu:"jenaka dan sering bercanda ringan"}[S.style];
  const lg={id:"bahasa Indonesia",en:"English",mix:"campuran Indonesia dan Inggris"}[S.lang];
- return "Kamu bernama "+c.n+", seorang "+(c.g==="f"?"perempuan":"laki-laki")+". "+c.d+" Gaya bicara: "+st+". Bahasa: "+lg+". Ini telepon suara: jawab dalam "+(S.len==="singkat"?"1-2 kalimat pendek":"2-4 kalimat")+", tanpa emoji, tanpa markdown atau daftar, seperti orang bicara lisan. Sesekali ajukan satu pertanyaan balik. "+S.custom;
+ return "Kamu bernama "+c.n+", seorang "+(c.g==="f"?"perempuan":"laki-laki")+". "+c.d+" Gaya bicara: "+st+". Bahasa: "+lg+". Ini telepon suara: jawab dalam "+(S.len==="singkat"?"1-2 kalimat pendek":"2-4 kalimat")+", tanpa emoji, tanpa markdown atau daftar, seperti orang bicara lisan. Sesekali pakai kata isian alami (hmm, eh, wah) dan ajukan satu pertanyaan balik. "+S.custom;
 }
 
 async function ask(t){
@@ -187,7 +177,6 @@ async function ask(t){
  if(!calling){busy=false;return}
  $("live").textContent="";
  if(reply){hist.push({role:"assistant",content:reply});log("a",reply);status(cur().n+" sedang bicara...","talk");await say(reply)}
- else await say("Maaf, sambungannya bermasalah. Coba ulangi ya.");
  busy=false;if(calling)listen();
 }
 
@@ -216,25 +205,21 @@ function end(){
 
 $("call").onclick=()=>calling?end():start();
 $("mute").onclick=function(){muted=!muted;this.classList.toggle("on",muted);if(muted){try{rec&&rec.abort()}catch(e){}rec=null;status("Mikrofon dibisukan")}else listen()};
-$("stop").onclick=stopSpeech;
+$("stop").onclick=()=>{stopSpeech()};
 const typed=()=>{const t=$("txt").value.trim();if(!t||!calling||busy)return;$("txt").value="";stopSpeech();try{rec&&rec.abort()}catch(e){}ask(t)};
 $("send").onclick=typed;$("txt").onkeydown=e=>{if(e.key==="Enter")typed()};
 ["style","len","lang"].forEach(k=>{$(k).value=S[k];$(k).onchange=()=>{S[k]=$(k).value;save()}});
+$("voice").innerHTML='<option value="auto">Otomatis (sesuai karakter)</option>'+VO.map(v=>'<option value="'+v[0]+'">'+v[1]+'</option>').join("");
 $("custom").value=S.custom;$("custom").oninput=()=>{S.custom=$("custom").value;save()};
 $("voice").onchange=()=>{S.voice=$("voice").value;save()};
-$("pitch").oninput=()=>{S.pitch=+$("pitch").value;sync();save()};
-$("rate").oninput=()=>{S.rate=+$("rate").value;sync();save()};
+$("rate").oninput=()=>{S.rate=+$("rate").value;sync();save();if(au)au.playbackRate=S.rate};
 $("test").onclick=()=>say("Halo, begini suaraku dengan pengaturan ini.");
-$("reset").onclick=()=>{S.pitch=S.rate=null;S.voice="auto";save();applyChar()};
+$("reset").onclick=()=>{S.rate=null;S.voice="auto";save();applyChar()};
 $("dl").onclick=()=>{
  const t=hist.filter(m=>m.content.charAt(0)!=="(").map(m=>(m.role==="user"?"Saya: ":cur().n+": ")+m.content).join("\n");
  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t||"Belum ada percakapan."],{type:"text/plain"}));a.download="transkrip.txt";a.click();
 };
-
-if(synth){loadVoices();synth.onvoiceschanged=()=>{loadVoices();applyChar()}}
-const w=[];if(!synth)w.push("Perangkat ini tidak mendukung suara AI.");
-if(!SR)w.push("Browser ini tidak mendukung pengenalan suara. Pakai Chrome atau Edge, atau ketik pesan.");
-$("warn").textContent=w.join(" ");
+if(!SR)$("warn").textContent="Browser ini tidak mendukung pengenalan suara. Pakai Chrome atau Edge, atau ketik pesan.";
 renderTabs();renderChars();applyChar();
 })();
 </script>
