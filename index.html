@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Telepon AI</title>
+<title>Telepon AI Realtime</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📞%3C/text%3E%3C/svg%3E">
 <style>
 :root{--bg:#eef0f7;--card:#fff;--ink:#16182b;--mut:#6b7090;--line:#dde0ee;--ok:#16a34a;--bad:#e11d48;--h:250;
@@ -21,10 +21,9 @@ body{background:var(--bg);color:var(--ink);font:15px/1.45 ui-rounded,"Nunito",sy
 @media(prefers-reduced-motion:reduce){.av.talk{animation:none}}
 h1{margin:0;font-size:22px}h2{margin:0 0 10px;font-size:15px}
 .sub{color:var(--mut);font-size:13px}.st{min-height:22px;margin-top:6px;color:var(--mut)}
-.live{min-height:42px;margin-top:8px;font-style:italic;color:var(--mut);font-size:14px}
-.bt{display:flex;justify-content:center;gap:16px;margin-top:14px}
+.bt{display:flex;justify-content:center;gap:16px;margin-top:16px}
 .b{width:62px;height:62px;border:0;border-radius:50%;font-size:25px;cursor:pointer;background:var(--line);color:var(--ink)}
-.b.go{background:var(--ok);color:#fff}.b.end{background:var(--bad);color:#fff}.b.on{background:hsl(var(--h) 75% 55%);color:#fff}
+.b.go{background:var(--ok);color:#fff}.b.end{background:var(--bad);color:#fff}.b.on{background:hsl(var(--h) 75% 55%);color:#fff}.b:disabled{opacity:.5}
 button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid hsl(var(--h) 85% 60%);outline-offset:2px}
 .tabs{display:flex;gap:6px;margin-bottom:12px}
 .tab{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer;font:inherit;font-size:13px}
@@ -51,12 +50,12 @@ input[type=range]{width:100%;accent-color:hsl(var(--h) 75% 55%)}
     <div class="av" id="av">🙂</div>
     <h1 id="nm"></h1><div class="sub" id="bl"></div>
     <div class="st" id="st">Siap menelepon</div><div class="sub" id="tm">00:00</div>
-    <div class="live" id="live"></div>
     <div class="bt">
       <button class="b" id="mute" title="Bisukan mikrofon" aria-label="Bisukan mikrofon">🎙️</button>
       <button class="b go" id="call" title="Telepon" aria-label="Telepon">📞</button>
-      <button class="b" id="stop" title="Hentikan suara AI" aria-label="Hentikan suara AI">⏹️</button>
+      <button class="b" id="stop" title="Potong suara AI" aria-label="Potong suara AI">⏹️</button>
     </div>
+    <div class="sub" style="margin-top:12px">Bicara kapan saja untuk menyela AI, seperti telepon sungguhan.</div>
     <div class="row"><input type="text" id="txt" placeholder="Atau ketik pesan..."><button class="sm" id="send" style="flex:0 0 72px">Kirim</button></div>
     <div class="sub" id="warn" style="margin-top:10px"></div>
   </section>
@@ -80,7 +79,7 @@ input[type=range]{width:100%;accent-color:hsl(var(--h) 75% 55%)}
       <label for="rate">Kecepatan bicara: <span id="rv"></span></label><input type="range" id="rate" min="0.7" max="1.5" step="0.05">
       <label for="custom">Tambahan kepribadian (opsional)</label>
       <textarea id="custom" rows="2" placeholder="Contoh: kamu suka kopi dan sering menyebut hujan"></textarea>
-      <div class="row"><button class="sm" id="test">🔊 Coba suara</button><button class="sm" id="reset">Atur ulang suara</button></div>
+      <div class="row"><button class="sm" id="reset">Atur ulang suara</button></div>
     </section>
 
     <section class="box">
@@ -95,25 +94,25 @@ input[type=range]{width:100%;accent-color:hsl(var(--h) 75% 55%)}
 (()=>{
 const $=i=>document.getElementById(i);
 const CH=[
- {id:"mimi",n:"Mimi",g:"f",e:"👧",h:330,v:"coral",rt:1.05,b:"Teman akrab yang ceria",s:"a cheerful, bright young Indonesian woman, playful and quick-witted, smiling as she speaks",d:"Kamu teman akrab yang ceria, hangat, dan suka bercanda.",hi:"Halo! Aku Mimi. Lagi ngapain nih?"},
+ {id:"mimi",n:"Mimi",g:"f",e:"👧",h:330,v:"marin",rt:1.05,b:"Teman akrab yang ceria",s:"a cheerful, bright young Indonesian woman, playful and quick-witted, smiling as she speaks, laughs easily",d:"Kamu teman akrab yang ceria, hangat, dan suka bercanda.",hi:"Halo! Aku Mimi. Lagi ngapain nih?"},
  {id:"sari",n:"Sari",g:"f",e:"🌸",h:150,v:"sage",rt:0.95,b:"Kakak lembut, pendengar baik",s:"a gentle, warm older-sister voice, soft, calm and caring, slightly slower",d:"Kamu kakak perempuan yang lembut, sabar, pandai mendengarkan dan memberi semangat.",hi:"Halo, ini Sari. Gimana harimu?"},
  {id:"luna",n:"Luna",g:"f",e:"🔮",h:270,v:"shimmer",rt:1.0,b:"Guru cerdas yang jelas menjelaskan",s:"a clear, confident, intelligent woman, articulate like a favorite teacher",d:"Kamu guru perempuan yang cerdas, menjelaskan dengan contoh sederhana, dan penuh rasa ingin tahu.",hi:"Hai, aku Luna. Mau belajar atau ngobrol apa hari ini?"},
- {id:"kirana",n:"Kirana",g:"f",e:"💃",h:20,v:"nova",rt:1.1,b:"Bestie gaul yang ceplas-ceplos",s:"an energetic Jakarta best friend, fast, expressive, slangy, laughs easily",d:"Kamu bestie perempuan yang gaul, ekspresif, ceplas-ceplos tapi baik hati.",hi:"Haii, Kirana di sini! Cerita dong!"},
- {id:"raka",n:"Raka",g:"m",e:"😎",h:210,v:"echo",rt:1.0,b:"Cowok santai yang humoris",s:"a relaxed young Indonesian man, easygoing and casual, with a bit of dry humor",d:"Kamu cowok yang santai, humoris, dan enak diajak ngobrol soal apa saja.",hi:"Yo, aku Raka. Ada apa nih?"},
- {id:"bima",n:"Bima",g:"m",e:"🧔",h:35,v:"onyx",rt:0.92,b:"Mentor bijak bersuara berat",s:"a deep, calm, wise middle-aged man, slow and deliberate, with warm gravitas",d:"Kamu mentor laki-laki yang tenang, bijak, dan memberi nasihat dengan perumpamaan sederhana.",hi:"Selamat datang. Saya Bima. Silakan, apa yang ingin dibicarakan?"},
- {id:"dion",n:"Dion",g:"m",e:"🤡",h:55,v:"ash",rt:1.1,b:"Pelawak dengan jokes receh",s:"a goofy comedian, lively, exaggerated timing, pausing before punchlines",d:"Kamu laki-laki pelawak yang suka jokes receh dan permainan kata, tapi tetap peduli pada lawan bicara.",hi:"Halo! Aku Dion. Awas ya, jokesku receh!"},
- {id:"arga",n:"Arga",g:"m",e:"🎓",h:185,v:"ballad",rt:1.0,b:"Pelatih bahasa Inggris",s:"a patient, friendly English coach with clear pronunciation and an encouraging tone",d:"Kamu pelatih bahasa Inggris laki-laki yang sabar. Balas dengan English sederhana, lalu koreksi kesalahan lawan bicara dengan lembut.",hi:"Hi, I am Arga. Let us practice English together. How are you today?"}
+ {id:"kirana",n:"Kirana",g:"f",e:"💃",h:20,v:"coral",rt:1.1,b:"Bestie gaul yang ceplas-ceplos",s:"an energetic Jakarta best friend, fast, expressive, slangy, laughs easily",d:"Kamu bestie perempuan yang gaul, ekspresif, ceplas-ceplos tapi baik hati.",hi:"Haii, Kirana di sini! Cerita dong!"},
+ {id:"raka",n:"Raka",g:"m",e:"😎",h:210,v:"ash",rt:1.0,b:"Cowok santai yang humoris",s:"a relaxed young Indonesian man, easygoing and casual, with a bit of dry humor",d:"Kamu cowok yang santai, humoris, dan enak diajak ngobrol soal apa saja.",hi:"Yo, aku Raka. Ada apa nih?"},
+ {id:"bima",n:"Bima",g:"m",e:"🧔",h:35,v:"cedar",rt:0.92,b:"Mentor bijak bersuara berat",s:"a deep, calm, wise middle-aged man, slow and deliberate, with warm gravitas",d:"Kamu mentor laki-laki yang tenang, bijak, dan memberi nasihat dengan perumpamaan sederhana.",hi:"Selamat datang. Saya Bima. Silakan, apa yang ingin dibicarakan?"},
+ {id:"dion",n:"Dion",g:"m",e:"🤡",h:55,v:"verse",rt:1.1,b:"Pelawak dengan jokes receh",s:"a goofy comedian, lively, exaggerated timing, pausing before punchlines",d:"Kamu laki-laki pelawak yang suka jokes receh dan permainan kata, tapi tetap peduli pada lawan bicara.",hi:"Halo! Aku Dion. Awas ya, jokesku receh!"},
+ {id:"arga",n:"Arga",g:"m",e:"🎓",h:185,v:"echo",rt:1.0,b:"Pelatih bahasa Inggris",s:"a patient, friendly English coach with clear pronunciation and an encouraging tone",d:"Kamu pelatih bahasa Inggris laki-laki yang sabar. Balas dengan English sederhana, lalu koreksi kesalahan lawan bicara dengan lembut.",hi:"Hi, I am Arga. Let us practice English together. How are you today?"}
 ];
-const VO=[["coral","Coral (cewek)"],["nova","Nova (cewek)"],["shimmer","Shimmer (cewek)"],["sage","Sage (cewek)"],["ash","Ash (cowok)"],["echo","Echo (cowok)"],["onyx","Onyx (cowok)"],["ballad","Ballad (cowok)"],["verse","Verse (cowok)"],["alloy","Alloy (netral)"],["fable","Fable (netral)"]];
+const VO=[["marin","Marin (cewek)"],["coral","Coral (cewek)"],["shimmer","Shimmer (cewek)"],["sage","Sage (cewek)"],["cedar","Cedar (cowok)"],["ash","Ash (cowok)"],["verse","Verse (cowok)"],["echo","Echo (cowok)"],["ballad","Ballad (cowok)"],["alloy","Alloy (netral)"]];
 let S={ch:"mimi",style:"santai",len:"singkat",lang:"id",voice:"auto",rate:null,custom:"",tab:"all"};
-try{Object.assign(S,JSON.parse(localStorage.getItem("tai2")||"{}"))}catch(e){}
-const save=()=>{try{localStorage.setItem("tai2",JSON.stringify(S))}catch(e){}};
+try{Object.assign(S,JSON.parse(localStorage.getItem("tai3")||"{}"))}catch(e){}
+const save=()=>{try{localStorage.setItem("tai3",JSON.stringify(S))}catch(e){}};
 const cur=()=>CH.find(c=>c.id===S.ch)||CH[0];
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-let calling=false,busy=false,speaking=false,muted=false,hist=[],rec=null,token=0,t0=0,tick=null,au=null,stopCur=null;
+let calling=false,muted=false,pc=null,dc=null,ms=null,aud=null,tick=null,cb=null,pend={};
 
 function status(s,k){$("st").textContent=s;$("av").className="av"+(k?" "+k:"")}
-function log(r,t){const l=$("log");if(!l.querySelector(".m"))l.innerHTML="";const d=document.createElement("div");d.className="m "+r;d.textContent=t;l.appendChild(d);l.scrollTop=l.scrollHeight}
+function bubble(r,t){const l=$("log");if(!l.querySelector(".m"))l.innerHTML="";const d=document.createElement("div");d.className="m "+r;d.textContent=t;l.appendChild(d);l.scrollTop=l.scrollHeight;return d}
+const send=o=>{if(dc&&dc.readyState==="open")dc.send(JSON.stringify(o))};
 
 function renderTabs(){
  $("tabs").innerHTML="";
@@ -126,7 +125,7 @@ function renderChars(){
  CH.filter(c=>S.tab==="all"||c.g===S.tab).forEach(c=>{
   const b=document.createElement("button");b.className="c"+(c.id===S.ch?" on":"");b.style.setProperty("--ch",c.h);
   b.innerHTML='<div class="e">'+c.e+'</div><b>'+c.n+'</b><span>'+c.b+'</span>';
-  b.onclick=()=>{S.ch=c.id;S.rate=null;S.voice="auto";save();applyChar();renderChars();say(c.hi)};
+  b.onclick=()=>{S.ch=c.id;S.rate=null;S.voice="auto";save();applyChar();renderChars();restart()};
   $("chars").appendChild(b)})
 }
 function applyChar(){
@@ -136,90 +135,72 @@ function applyChar(){
 }
 function sync(){$("rv").textContent=(+$("rate").value).toFixed(2)+"x"}
 
-function instr(){
- const c=cur(),st={santai:"casual and relaxed",formal:"polite and formal",gaul:"youthful and trendy",lucu:"playful and amused"}[S.style];
- const lg=S.lang==="en"?"Speak English.":"Speak natural Indonesian with an authentic Indonesian accent"+(S.lang==="mix"?", switching to English words naturally.":".");
- return "Voice: "+c.s+". Tone: "+st+". "+lg+" Sound like a real person on a phone call: natural rhythm, small pauses, warm intonation, never like reading a script.";
-}
-async function tts(text){
- const r=await fetch("/api/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:text,voice:S.voice==="auto"?cur().v:S.voice,instructions:instr()})});
- if(!r.ok){let m=r.status;try{m=(await r.json()).error||m}catch(e){}throw new Error(m)}
- return URL.createObjectURL(await r.blob());
-}
-function stopSpeech(){token++;if(au){au.pause();au=null}if(stopCur){stopCur();stopCur=null}speaking=false}
-async function say(text){
- stopSpeech();const my=++token;speaking=true;
- const parts=(text.match(/[^.!?\n]+[.!?]*/g)||[text]).map(s=>s.trim()).filter(Boolean);
- const jobs=parts.map(p=>tts(p).then(u=>({u}),e=>({e})));
- for(const j of jobs){
-  const x=await j;if(my!==token)break;
-  if(x.e){$("warn").textContent="Error suara: "+x.e.message;break}
-  await new Promise(r=>{stopCur=r;const a=au=new Audio(x.u);a.playbackRate=+$("rate").value;a.onended=a.onerror=r;a.play().catch(r)});
-  URL.revokeObjectURL(x.u);
- }
- if(my===token)speaking=false;
-}
-
 function sys(){
  const c=cur(),st={santai:"santai dan natural",formal:"sopan dan formal",gaul:"gaul ala anak muda (sih, dong, banget)",lucu:"jenaka dan sering bercanda ringan"}[S.style];
- const lg={id:"bahasa Indonesia",en:"English",mix:"campuran Indonesia dan Inggris"}[S.lang];
- return "Kamu bernama "+c.n+", seorang "+(c.g==="f"?"perempuan":"laki-laki")+". "+c.d+" Gaya bicara: "+st+". Bahasa: "+lg+". Ini telepon suara: jawab dalam "+(S.len==="singkat"?"1-2 kalimat pendek":"2-4 kalimat")+", tanpa emoji, tanpa markdown atau daftar, seperti orang bicara lisan. Sesekali pakai kata isian alami (hmm, eh, wah) dan ajukan satu pertanyaan balik. "+S.custom;
+ const lg={id:"bahasa Indonesia dengan aksen Indonesia yang natural",en:"English",mix:"campuran Indonesia dan Inggris secara natural"}[S.lang];
+ return "Kamu bernama "+c.n+", seorang "+(c.g==="f"?"perempuan":"laki-laki")+". "+c.d+"\nSuara dan cara bicara: "+c.s+".\nGaya bicara: "+st+". Bahasa: "+lg+".\nIni telepon suara. Jawab "+(S.len==="singkat"?"1-2 kalimat pendek":"2-4 kalimat")+", seperti orang mengobrol: ada jeda, kata isian alami (hmm, eh, wah), tawa kecil bila pas, jangan terdengar membaca naskah. Jangan memakai daftar atau emoji. Jika pengguna menyela, berhenti dan tanggapi apa yang ia katakan. Sesekali ajukan satu pertanyaan balik. "+S.custom;
+}
+const push=()=>send({type:"session.update",session:{type:"realtime",instructions:sys(),audio:{output:{speed:+$("rate").value}}}});
+
+function onEv(e){
+ const t=e.type;
+ if(t==="input_audio_buffer.speech_started"){status("Mendengarkan...","listen");pend[e.item_id]=bubble("u","…")}
+ else if(t==="conversation.item.input_audio_transcription.completed"){const b=pend[e.item_id];if(b){b.textContent=(e.transcript||"").trim()||"(tidak terdengar)";delete pend[e.item_id]}}
+ else if(t==="response.created"){cb=bubble("a","")}
+ else if(/^response\.(output_)?audio_transcript\.delta$/.test(t)){if(cb){cb.textContent+=e.delta;$("log").scrollTop=1e9}}
+ else if(/^response\.(output_)?audio_transcript\.done$/.test(t)){if(cb&&e.transcript)cb.textContent=e.transcript}
+ else if(t==="response.done"){if(cb&&!cb.textContent)cb.remove();cb=null}
+ else if(t==="output_audio_buffer.started")status(cur().n+" sedang bicara...","talk");
+ else if(/^output_audio_buffer\.(stopped|cleared)$/.test(t))status("Mendengarkan...","listen");
+ else if(t==="error")$("warn").textContent="Error: "+((e.error&&e.error.message)||"tidak diketahui");
 }
 
-async function ask(t){
- busy=true;hist.push({role:"user",content:t});log("u",t);status(cur().n+" sedang berpikir...");
- let reply=null;
- try{
-  const m=hist.slice(-20);while(m.length&&m[0].role!=="user")m.shift();
-  const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({system:sys(),messages:m})});
-  const d=await r.json();if(!r.ok)throw new Error(d.error||r.status);reply=d.reply;
- }catch(e){$("warn").textContent="Error: "+e.message;hist.pop()}
- if(!calling){busy=false;return}
- $("live").textContent="";
- if(reply){hist.push({role:"assistant",content:reply});log("a",reply);status(cur().n+" sedang bicara...","talk");await say(reply)}
- busy=false;if(calling)listen();
+function cleanup(){
+ clearInterval(tick);try{dc&&dc.close()}catch(x){}try{pc&&pc.close()}catch(x){}
+ if(ms)ms.getTracks().forEach(t=>t.stop());if(aud){aud.srcObject=null}
+ pc=dc=ms=aud=cb=null;pend={};calling=false;
 }
-
-function listen(){
- if(!calling||busy||speaking||muted||!SR)return;
- try{rec&&rec.abort()}catch(e){}
- const r=rec=new SR();r.lang=S.lang==="en"?"en-US":"id-ID";r.interimResults=true;r.continuous=false;let fin="";
- r.onstart=()=>status("Mendengarkan...","listen");
- r.onresult=ev=>{let i="";for(let k=ev.resultIndex;k<ev.results.length;k++){const x=ev.results[k];if(x.isFinal)fin+=x[0].transcript;else i+=x[0].transcript}$("live").textContent=fin+i};
- r.onerror=e=>{if(/not-allowed|service-not-allowed/.test(e.error)){rec=null;status("Izin mikrofon ditolak. Ketik pesanmu.")}};
- r.onend=()=>{if(!calling||rec!==r)return;if(fin.trim())ask(fin.trim());else setTimeout(listen,300)};
- try{r.start()}catch(e){setTimeout(listen,500)}
-}
-
 async function start(){
- calling=true;hist=[];busy=true;muted=false;$("mute").classList.remove("on");$("log").innerHTML="";$("warn").textContent="";
- $("call").className="b end";$("call").textContent="📵";
- t0=Date.now();clearInterval(tick);tick=setInterval(()=>{const s=(Date.now()-t0)/1000|0;$("tm").textContent=String(s/60|0).padStart(2,"0")+":"+String(s%60).padStart(2,"0")},500);
- const hi=cur().hi;hist.push({role:"user",content:"(Telepon tersambung. Sapa aku.)"},{role:"assistant",content:hi});
- status("Tersambung","talk");log("a",hi);await say(hi);busy=false;listen();
+ $("warn").textContent="";$("call").disabled=true;status("Menyambungkan...");
+ try{
+  const sr=await fetch("/api/session",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({instructions:sys(),voice:S.voice==="auto"?cur().v:S.voice,lang:S.lang,speed:+$("rate").value})});
+  const sj=await sr.json();if(!sr.ok)throw new Error(sj.error||sr.status);
+  ms=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+  pc=new RTCPeerConnection();aud=new Audio();aud.autoplay=true;pc.ontrack=e=>{aud.srcObject=e.streams[0]};
+  pc.addTrack(ms.getAudioTracks()[0],ms);
+  dc=pc.createDataChannel("oai-events");dc.onmessage=ev=>{try{onEv(JSON.parse(ev.data))}catch(x){}};
+  dc.onopen=()=>send({type:"response.create",response:{instructions:"Sapa pengguna dengan singkat dan natural, kira-kira seperti: "+cur().hi}});
+  pc.onconnectionstatechange=()=>{if(calling&&/failed|closed/.test(pc.connectionState)){$("warn").textContent="Koneksi terputus.";end()}};
+  await pc.setLocalDescription(await pc.createOffer());
+  const ar=await fetch("https://api.openai.com/v1/realtime/calls",{method:"POST",body:pc.localDescription.sdp,headers:{Authorization:"Bearer "+sj.token,"Content-Type":"application/sdp"}});
+  if(!ar.ok)throw new Error("Gagal tersambung ("+ar.status+")");
+  await pc.setRemoteDescription({type:"answer",sdp:await ar.text()});
+  calling=true;muted=false;$("mute").classList.remove("on");$("log").innerHTML="";
+  $("call").className="b end";$("call").textContent="📵";status("Tersambung","listen");
+  const t0=Date.now();tick=setInterval(()=>{const s=(Date.now()-t0)/1000|0;$("tm").textContent=String(s/60|0).padStart(2,"0")+":"+String(s%60).padStart(2,"0")},500);
+ }catch(e){$("warn").textContent="Error: "+e.message;cleanup();status("Siap menelepon")}
+ $("call").disabled=false;
 }
-function end(){
- calling=false;busy=false;stopSpeech();try{rec&&rec.abort()}catch(e){}rec=null;clearInterval(tick);
- $("call").className="b go";$("call").textContent="📞";$("live").textContent="";status("Telepon berakhir");
-}
+function end(){cleanup();$("call").className="b go";$("call").textContent="📞";status("Telepon berakhir")}
+function restart(){if(calling){end();setTimeout(start,400)}}
 
 $("call").onclick=()=>calling?end():start();
-$("mute").onclick=function(){muted=!muted;this.classList.toggle("on",muted);if(muted){try{rec&&rec.abort()}catch(e){}rec=null;status("Mikrofon dibisukan")}else listen()};
-$("stop").onclick=()=>{stopSpeech()};
-const typed=()=>{const t=$("txt").value.trim();if(!t||!calling||busy)return;$("txt").value="";stopSpeech();try{rec&&rec.abort()}catch(e){}ask(t)};
+$("mute").onclick=function(){if(!ms)return;muted=!muted;ms.getAudioTracks()[0].enabled=!muted;this.classList.toggle("on",muted);status(muted?"Mikrofon dibisukan":"Mendengarkan...",muted?"":"listen")};
+$("stop").onclick=()=>{send({type:"response.cancel"});send({type:"output_audio_buffer.clear"})};
+const typed=()=>{const t=$("txt").value.trim();if(!t||!calling)return;$("txt").value="";bubble("u",t);
+ send({type:"conversation.item.create",item:{type:"message",role:"user",content:[{type:"input_text",text:t}]}});send({type:"response.create"})};
 $("send").onclick=typed;$("txt").onkeydown=e=>{if(e.key==="Enter")typed()};
-["style","len","lang"].forEach(k=>{$(k).value=S[k];$(k).onchange=()=>{S[k]=$(k).value;save()}});
+["style","len","lang"].forEach(k=>{$(k).value=S[k];$(k).onchange=()=>{S[k]=$(k).value;save();push()}});
 $("voice").innerHTML='<option value="auto">Otomatis (sesuai karakter)</option>'+VO.map(v=>'<option value="'+v[0]+'">'+v[1]+'</option>').join("");
-$("custom").value=S.custom;$("custom").oninput=()=>{S.custom=$("custom").value;save()};
-$("voice").onchange=()=>{S.voice=$("voice").value;save()};
-$("rate").oninput=()=>{S.rate=+$("rate").value;sync();save();if(au)au.playbackRate=S.rate};
-$("test").onclick=()=>say("Halo, begini suaraku dengan pengaturan ini.");
-$("reset").onclick=()=>{S.rate=null;S.voice="auto";save();applyChar()};
+$("custom").value=S.custom;$("custom").onchange=()=>{S.custom=$("custom").value;save();push()};
+$("voice").onchange=()=>{S.voice=$("voice").value;save();restart()};
+$("rate").oninput=()=>{S.rate=+$("rate").value;sync();save()};$("rate").onchange=push;
+$("reset").onclick=()=>{S.rate=null;S.voice="auto";save();applyChar();restart()};
 $("dl").onclick=()=>{
- const t=hist.filter(m=>m.content.charAt(0)!=="(").map(m=>(m.role==="user"?"Saya: ":cur().n+": ")+m.content).join("\n");
+ const t=[].map.call($("log").querySelectorAll(".m"),m=>(m.classList.contains("u")?"Saya: ":cur().n+": ")+m.textContent).join("\n");
  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t||"Belum ada percakapan."],{type:"text/plain"}));a.download="transkrip.txt";a.click();
 };
-if(!SR)$("warn").textContent="Browser ini tidak mendukung pengenalan suara. Pakai Chrome atau Edge, atau ketik pesan.";
+if(!navigator.mediaDevices||!window.RTCPeerConnection)$("warn").textContent="Browser ini tidak mendukung panggilan suara. Gunakan Chrome, Edge, atau Safari terbaru.";
 renderTabs();renderChars();applyChar();
 })();
 </script>
